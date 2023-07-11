@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FED.Excel.Core", "FED.Excel.Core\FED.Excel.Core.csproj", "{C621A0F1-0856-41DD-983B-FFDDBAABD940}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FED.Excel.Test", "FED.Excel.Test\FED.Excel.Test.csproj", "{1DC055CE-091A-43F3-A890-E8048ECE300A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{C621A0F1-0856-41DD-983B-FFDDBAABD940}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C621A0F1-0856-41DD-983B-FFDDBAABD940}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C621A0F1-0856-41DD-983B-FFDDBAABD940}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DC055CE-091A-43F3-A890-E8048ECE300A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DC055CE-091A-43F3-A890-E8048ECE300A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DC055CE-091A-43F3-A890-E8048ECE300A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DC055CE-091A-43F3-A890-E8048ECE300A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
