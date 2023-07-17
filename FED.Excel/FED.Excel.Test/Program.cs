@@ -5,5 +5,5 @@ using FED.Excel.Test;
 
 Console.WriteLine("Hello, World!");
 var wb = new ExcelWorkbook("D:\\1.xlsx");
-var test = wb.Sheets.FirstOrDefault().ConvertTo<Test001>(false);
+var test = wb.Sheets.FirstOrDefault().ConvertTo<Test001>();
 Console.ReadLine();
