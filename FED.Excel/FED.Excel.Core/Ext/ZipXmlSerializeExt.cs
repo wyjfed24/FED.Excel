@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace FED.Excel.Core.Ext
 {
-    public static class ZipXmlSerializerExt
+    public static class ZipXmlSerializeExt
     {
         public static XmlModel Deserialize<XmlModel>(this ZipArchiveEntry entry) where XmlModel : class
         {

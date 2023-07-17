@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FED.Excel.Core.Attributes
 {
-    public class ExcelNavicatAttribute
+    public class ExcelNavicatAttribute: Attribute
     {
         public string Name { get; set; }
     }

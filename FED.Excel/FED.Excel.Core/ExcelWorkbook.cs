@@ -23,20 +23,20 @@ namespace FED.Excel.Core
             BuildWorkbook(filePath);
         }
 
+        private void BuildWorkbook(string filePath)
+        {
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                BuildWorkbook(stream);
+            }
+        }
+
         private void BuildWorkbook(Stream stream)
         {
             using (var package = new ExcelPackage(stream))
             {
                 //转换对象
                 BuildWorkbook(package);
-            }
-        }
-
-        private void BuildWorkbook(string filePath)
-        {
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                BuildWorkbook(stream);
             }
         }
 

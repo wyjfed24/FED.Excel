@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace FED.Excel.Core.Attributes
 {
-    public class ExcelColumnAttribute
+    public class ExcelColumnAttribute : Attribute
     {
         public string Name { get; set; }
+        public ExcelColumnAttribute(string name)
+        {
+            Name = name;
+        }
     }
 }
