@@ -9,8 +9,9 @@ namespace FED.Excel.Core
         public string Name { get; set; }
         public List<ExcelSheetRow> Rows { get; set; } = new List<ExcelSheetRow>();
 
-        public ExcelWorksheet(int index) {
+        public ExcelWorksheet(int index, string name) {
             Index = index;
+            Name = name;
         }
 
         public ExcelSheetRow AppendRow()

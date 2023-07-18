@@ -5,6 +5,8 @@ namespace FED.Excel.Core.ExcelXmlModel
     [XmlRoot(ElementName = "worksheet", Namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main", IsNullable = false)]
     public class SheetXmlModel
     {
+        public string Name { get; set; }
+
         [XmlElement("sheetData")]
         public SheetDataXmlModel SheetData { get; set; }
     }

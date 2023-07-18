@@ -1,17 +1,18 @@
-﻿namespace FED.Excel.Core
+﻿using FED.Excel.Core.Utility;
+
+namespace FED.Excel.Core
 {
     public class ExcelSheetCell
     {
         public object Value { get; set; }
 
         public int RowIndex { get; }
-        public int CellIndex { get; set; }
-        public string Name { get { return ""; } }
+        public string Column { get; }
 
-        public ExcelSheetCell(int rowIndex, int cellIndex)
+        public ExcelSheetCell(int rowIndex, string column)
         {
             RowIndex = rowIndex;
-            CellIndex = cellIndex;
+            Column = column;
         }
 
         public T GetValue<T>()

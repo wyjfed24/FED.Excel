@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace FED.Excel.Core
 {
@@ -45,13 +46,13 @@ namespace FED.Excel.Core
             var pgUnNullSheets = package.Sheets.Where(x => x.SheetData.Rows != null).ToList();
             foreach (var pgSheet in pgUnNullSheets)
             {
-                var sheet = AppendSheet();
+                var sheet = AppendSheet(pgSheet.Name);
                 foreach (var pgRow in pgSheet.SheetData.Rows)
                 {
                     var row = sheet.AppendRow();
                     foreach (var pgCell in pgRow.Cells)
                     {
-                        var cell = row.AppendCell();
+                        var cell = row.CreateCell(pgCell.CellNumber.Replace(pgRow.RowNumber.ToString(), string.Empty));
                         if (pgCell.Value == null)
                             continue;
                         if (pgCell.CellType == "s")//字符串
@@ -88,19 +89,19 @@ namespace FED.Excel.Core
         }
 
 
-        public ExcelWorksheet AppendSheet()
+        public ExcelWorksheet AppendSheet(string name)
         {
-            var sheet = new ExcelWorksheet(Sheets.Count);
+            var sheet = new ExcelWorksheet(Sheets.Count, name);
             Sheets.Add(sheet);
             return sheet;
         }
 
-        public ExcelWorksheet InsertSheet(int index)
+        public ExcelWorksheet InsertSheet(int index, string name)
         {
             var maxIndex = Sheets.Count - 1;
             if (index > maxIndex)
-                return AppendSheet();
-            var sheet = new ExcelWorksheet(index);
+                return AppendSheet(name);
+            var sheet = new ExcelWorksheet(index, name);
             Sheets.Where(x => x.Index >= index).ToList().ForEach(x => x.Index += 1);
             Sheets.Insert(index, sheet);
             return sheet;

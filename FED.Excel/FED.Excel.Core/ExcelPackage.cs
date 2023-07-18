@@ -75,7 +75,12 @@ namespace FED.Excel.Core
             if (sheetsEntry == null)
                 return new List<SheetXmlModel>();
             var sheetDataList = new List<SheetXmlModel>();
-            sheetsEntry.ForEach(sheetDataItem => sheetDataList.Add(sheetDataItem.Deserialize<SheetXmlModel>()));
+            sheetsEntry.ForEach(sheetDataItem =>
+            {
+                var item = sheetDataItem.Deserialize<SheetXmlModel>();
+                item.Name = Path.GetFileNameWithoutExtension(sheetDataItem.Name);
+                sheetDataList.Add(item);
+            });
             return sheetDataList;
         }
 
@@ -86,8 +91,8 @@ namespace FED.Excel.Core
         /// </summary>
         /// <param name="filePath"></param>
         public void SaveAs(string filePath)
-        { 
-        
+        {
+
         }
 
         public void Dispose()
