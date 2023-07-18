@@ -82,7 +82,7 @@ namespace FED.Excel.Core.Ext
             var type = typeof(T);
             var props = type.GetProperties();
             var excelProps = props.Where(x => x.CustomAttributes.Any(c => c.AttributeType == typeof(ExcelColumnAttribute)))
-                                 .Select(x => (Column: string.Empty, Field: x.GetCustomAttribute<ExcelColumnAttribute>().Name, Prop: x))
+                                 .Select(x => (Field: x.GetCustomAttribute<ExcelColumnAttribute>().Name, Prop: x))
                                  .ToList();
             //获取excel首行表头单元格
             var headCells = sheet.Rows.FirstOrDefault().Cells;
