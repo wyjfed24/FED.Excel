@@ -8,7 +8,11 @@ namespace FED.Excel.Core.Attributes
 {
     public class ExcelColumnAttribute : Attribute
     {
+        /// <summary>
+        /// 列名
+        /// </summary>
         public string Name { get; set; }
+
         public ExcelColumnAttribute(string name)
         {
             Name = name;
