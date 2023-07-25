@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -36,18 +37,22 @@ namespace FED.Excel.Core
         {
             using (var package = new ExcelPackage(stream))
             {
+                var w = new Stopwatch();
+                w.Start();
                 //转换对象
                 BuildWorkbook(package);
+                w.Stop();
+                var a = w.ElapsedMilliseconds;
             }
         }
 
         private void BuildWorkbook(ExcelPackage package)
         {
-            var pgUnNullSheets = package.Sheets.Where(x => x.SheetData.Rows != null).ToList();
+            var pgUnNullSheets = package.Sheets.Where(x => x.Rows != null).ToList();
             foreach (var pgSheet in pgUnNullSheets)
             {
                 var sheet = AppendSheet(pgSheet.Name);
-                foreach (var pgRow in pgSheet.SheetData.Rows)
+                foreach (var pgRow in pgSheet.Rows)
                 {
                     var row = sheet.AppendRow();
                     foreach (var pgCell in pgRow.Cells)
@@ -61,7 +66,7 @@ namespace FED.Excel.Core
                             try//先转换为索引查询公共字符串表
                             {
                                 var index = Convert.ToInt32(pgCell.Value);
-                                value = package.SharedStringsTable[index];
+                                value = package.SharedStrings[index];
                             }
                             catch//失败则为原始值
                             {

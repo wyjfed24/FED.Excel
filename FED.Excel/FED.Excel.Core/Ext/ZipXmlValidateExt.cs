@@ -6,13 +6,13 @@ namespace FED.Excel.Core.Ext
 {
     public static class ZipXmlValidateExt
     {
-        public static bool IsDate(this StyleXmlModel style, int styleId)
+        public static bool IsDate(this StyleConfig style, int styleId)
         {
-            var cellXfs = style.CellXfInfo.CellXfs[styleId];
-            if (cellXfs.NumFmtId == 14)//日期默认样式Id为14
+            var cellXfs = style.CellXfs[styleId];
+            if (cellXfs.ApplyNumFmtId == 14)//日期默认样式Id为14
                 return true;
             //自定义日期需处理格式化规则
-            var numberFormat = style.NumberFormatInfo.NumberFormats.Where(x => x.NumFmtId == cellXfs.NumFmtId).FirstOrDefault();
+            var numberFormat = style.NumberFormats.Where(x => x.NumFmtId == cellXfs.ApplyNumFmtId).FirstOrDefault();
             if (numberFormat == null)
                 return false;
             var formatCode = numberFormat.FormatCode.ToLower().Replace("red","");//排除掉Red标签

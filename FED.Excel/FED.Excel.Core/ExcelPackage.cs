@@ -3,35 +3,47 @@ using FED.Excel.Core.Ext;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FED.Excel.Core
 {
     internal class ExcelPackage : IDisposable
     {
+        private ZipArchive _zip;
         /// <summary>
         /// 共享字符串表
         /// </summary>
-        internal SharedStringsTableXmlModel SharedStringsTable { get; set; }
+        internal ShareStringsTable SharedStrings { get; set; }
 
         /// <summary>
         /// 样式表
         /// </summary>
-        internal StyleXmlModel Style { get; set; }
+        internal StyleConfig Style { get; set; }
 
         /// <summary>
         /// Sheet原始数据集合
         /// </summary>
-        internal List<SheetXmlModel> Sheets { get; set; }
+        internal List<SheetData> Sheets { get; set; }
 
         internal ExcelPackage(Stream stream)
         {
-            var zip = new ZipArchive(stream);
-            SharedStringsTable = GetShareStrings(zip);
-            Style = GetStyles(zip);
-            Sheets = GetSheetDatas(zip);
+            _zip = new ZipArchive(stream);
+            Build();
+        }
+
+        public void Build()
+        {
+            var w = new Stopwatch();
+            w.Start();
+            SharedStrings = GetShareStrings(_zip);
+            Style = GetStyles(_zip);
+            Sheets = GetSheetDatas(_zip);
+            w.Stop();
+            var a = w.ElapsedMilliseconds;
         }
 
         #region Excel文件解析
@@ -41,12 +53,12 @@ namespace FED.Excel.Core
         /// </summary>
         /// <param name="zip"></param>
         /// <returns></returns>
-        private SharedStringsTableXmlModel GetShareStrings(ZipArchive zip)
+        private ShareStringsTable GetShareStrings(ZipArchive zip)
         {
             var sharedStringsEntry = zip.Entries.Where(x => x.FullName == "xl/sharedStrings.xml").FirstOrDefault();
             if (sharedStringsEntry == null)
-                return new SharedStringsTableXmlModel();
-            var sharedStringsTable = sharedStringsEntry.Deserialize<SharedStringsTableXmlModel>();
+                return new ShareStringsTable();
+            var sharedStringsTable = sharedStringsEntry.DeserializeShareStrings();
             return sharedStringsTable;
         }
 
@@ -55,12 +67,12 @@ namespace FED.Excel.Core
         /// </summary>
         /// <param name="zip"></param>
         /// <returns></returns>
-        private StyleXmlModel GetStyles(ZipArchive zip)
+        private StyleConfig GetStyles(ZipArchive zip)
         {
             var styleEntry = zip.Entries.Where(x => x.FullName == "xl/styles.xml").FirstOrDefault();
             if (styleEntry == null)
-                return new StyleXmlModel();
-            var style = styleEntry.Deserialize<StyleXmlModel>();
+                return new StyleConfig();
+            var style = styleEntry.DeserializeStyleConfig();
             return style;
         }
 
@@ -69,15 +81,15 @@ namespace FED.Excel.Core
         /// </summary>
         /// <param name="zip"></param>
         /// <returns></returns>
-        private List<SheetXmlModel> GetSheetDatas(ZipArchive zip)
+        private List<SheetData> GetSheetDatas(ZipArchive zip)
         {
+            var sheetDataList = new List<SheetData>();
             var sheetsEntry = zip.Entries.Where(x => x.FullName.StartsWith("xl/worksheets") && x.FullName.EndsWith(".xml") && !string.IsNullOrWhiteSpace(x.Name)).ToList();
             if (sheetsEntry == null)
-                return new List<SheetXmlModel>();
-            var sheetDataList = new List<SheetXmlModel>();
+                return sheetDataList;
             sheetsEntry.ForEach(sheetDataItem =>
             {
-                var item = sheetDataItem.Deserialize<SheetXmlModel>();
+                var item = sheetDataItem.DeserializeSheet();
                 item.Name = Path.GetFileNameWithoutExtension(sheetDataItem.Name);
                 sheetDataList.Add(item);
             });
@@ -97,7 +109,7 @@ namespace FED.Excel.Core
 
         public void Dispose()
         {
-            SharedStringsTable = null;
+            SharedStrings = null;
             Style = null;
             Sheets = null;
         }

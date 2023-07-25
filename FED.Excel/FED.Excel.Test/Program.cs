@@ -3,8 +3,16 @@ using FED.Excel.Core;
 using FED.Excel.Core.Ext;
 using FED.Excel.Core.Utility;
 using FED.Excel.Test;
-Console.WriteLine("Hello, World!");
+
+using System.Diagnostics;
+
+var w = new Stopwatch();
+w.Start();
 var wb = new ExcelWorkbook("D:\\test.xlsx");
-var sheet01 = wb.Sheets[0].ConvertTo<Sheet01>();
+//var sheet01 = wb.Sheets[0].ConvertTo<Sheet01>();
 var sheet02 = wb.Sheets[1].ConvertTo<Sheet02>();
+w.Stop();
+Console.WriteLine(w.ElapsedMilliseconds);
 Console.ReadLine();
+//var sheet02 = wb.Sheets[1].ConvertTo<Sheet02>();
+
