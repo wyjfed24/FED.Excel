@@ -37,12 +37,8 @@ namespace FED.Excel.Core
         {
             using (var package = new ExcelPackage(stream))
             {
-                var w = new Stopwatch();
-                w.Start();
                 //转换对象
                 BuildWorkbook(package);
-                w.Stop();
-                var a = w.ElapsedMilliseconds;
             }
         }
 

@@ -3,7 +3,6 @@ using FED.Excel.Core.Ext;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -37,19 +36,15 @@ namespace FED.Excel.Core
 
         public void Build()
         {
-            var w = new Stopwatch();
-            w.Start();
             SharedStrings = GetShareStrings(_zip);
             Style = GetStyles(_zip);
             Sheets = GetSheetDatas(_zip);
-            w.Stop();
-            var a = w.ElapsedMilliseconds;
         }
 
         #region Excel文件解析
 
         /// <summary>
-        /// 反序列化共享字符串表xml
+        /// 获取共享字符串表xml
         /// </summary>
         /// <param name="zip"></param>
         /// <returns></returns>
@@ -63,7 +58,7 @@ namespace FED.Excel.Core
         }
 
         /// <summary>
-        /// 反序列化样式表xml
+        /// 获取样式表xml
         /// </summary>
         /// <param name="zip"></param>
         /// <returns></returns>
@@ -77,7 +72,7 @@ namespace FED.Excel.Core
         }
 
         /// <summary>
-        /// 反序列化Sheet数据xml
+        /// 获取Sheet数据xml
         /// </summary>
         /// <param name="zip"></param>
         /// <returns></returns>
