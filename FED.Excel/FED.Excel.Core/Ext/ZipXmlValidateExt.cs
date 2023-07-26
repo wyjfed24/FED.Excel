@@ -6,9 +6,11 @@ namespace FED.Excel.Core.Ext
 {
     public static class ZipXmlValidateExt
     {
-        public static bool IsDate(this StyleConfig style, int styleId)
+        public static bool IsDate(this StyleConfig style, int? styleId)
         {
-            var cellXfs = style.CellXfs[styleId];
+            if(!styleId.HasValue)
+                return false;
+            var cellXfs = style.CellXfs[styleId.Value];
             if (cellXfs.ApplyNumFmtId == 14)//日期默认样式Id为14
                 return true;
             //自定义日期需处理格式化规则

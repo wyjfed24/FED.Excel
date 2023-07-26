@@ -100,15 +100,20 @@ namespace FED.Excel.Core.Ext
                                 if (reader.Name == "c" && reader.NodeType == XmlNodeType.Element)
                                 {
                                     var cellNumber = reader.GetAttribute("r");
-                                    var styleId = reader.GetAttribute("s");
+                                    var styleIdStr = reader.GetAttribute("s");
+                                    int? styleId;
+                                    if (int.TryParse(styleIdStr, out var value))
+                                        styleId = value;
+                                    else
+                                        styleId = null;
+
                                     var cellType = reader.GetAttribute("t");
                                     cell = new SheetRowCell
                                     {
                                         CellNumber = cellNumber,
                                         CellType = cellType,
-                                        StyleId = int.Parse(styleId)
+                                        StyleId = styleId
                                     };
-                                    row.Cells.Add(cell);
                                 }
                                 else if (reader.Name == "v" && reader.NodeType == XmlNodeType.Element)
                                 {

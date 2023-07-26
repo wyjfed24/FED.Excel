@@ -8,6 +8,38 @@ using System.Threading.Tasks;
 
 namespace FED.Excel.Test
 {
+    public class BigTest
+    {
+        [ExcelColumn("A")]
+        public string A { get; set; }
+
+        [ExcelColumn("B")]
+        public string B { get; set; }
+
+        [ExcelColumn("C")]
+        public string C { get; set; }
+
+        [ExcelColumn("D")]
+        public string D { get; set; }
+        
+        [ExcelColumn("E")]
+        public string E { get; set; }
+
+        [ExcelColumn("F")]
+        public string F { get; set; }
+
+        [ExcelColumn("G")]
+        public string G { get; set; }
+
+        [ExcelColumn("H")]
+        public string H { get; set; }
+
+        [ExcelColumn("I")]
+        public string I { get; set; }
+
+        [ExcelColumn("J")]
+        public string J { get; set; }
+    }
     public class Sheet01
     {
         [ExcelColumn("当前章节")]

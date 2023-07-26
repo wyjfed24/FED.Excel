@@ -29,7 +29,7 @@ namespace FED.Excel.Core.ExcelXmlModel
         /// <summary>
         /// 样式表Id
         /// </summary>
-        public int StyleId { get; set; }
+        public int? StyleId { get; set; }
 
         /// <summary>
         /// 单元格类型 “s”表示字符串，并且Value值为共享字符串表索引，空值表示Value存储实际值
