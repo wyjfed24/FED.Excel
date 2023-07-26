@@ -12,6 +12,11 @@ namespace FED.Excel.Core.Ext
 {
     public static class ZipXmlSerializeExt
     {
+        public static bool IsEndElement(this XmlReader reader, string nodeName)
+        {
+            return reader.Name == nodeName && reader.NodeType == XmlNodeType.EndElement;
+        }
+
         public static ShareStringsTable DeserializeShareStrings(this ZipArchiveEntry entry)
         {
             using (var stream = entry.Open())
@@ -22,12 +27,11 @@ namespace FED.Excel.Core.Ext
                     var i = 0;
                     while (!reader.EOF)
                     {
-                        if (reader.Name == "t")
+                        if (reader.IsStartElement("t"))
                         {
-                            reader.MoveToContent();
-                            var content = reader.ReadElementContentAsString();
+                            reader.Read();
+                            var content = reader.Value;
                             shareStringsTable.AddItem(i++, content);
-
                         }
                         reader.Read();
                     }
@@ -45,31 +49,31 @@ namespace FED.Excel.Core.Ext
                 {
                     while (!reader.EOF)
                     {
-                        if (reader.Name == "numFmts" && reader.NodeType == XmlNodeType.Element)
+                        if (reader.IsStartElement("numFmts"))
                         {
                             while (reader.Read())
                             {
-                                if (reader.Name == "numFmt" && reader.NodeType == XmlNodeType.Element)
+                                if (reader.IsStartElement("numFmt"))
                                 {
                                     var numFmtId = reader.GetAttribute("numFmtId");
                                     var formatCode = reader.GetAttribute("formatCode");
                                     styleConfig.NumberFormats.Add(new NumberFormatItem { NumFmtId = int.Parse(numFmtId), FormatCode = formatCode });
                                 }
-                                else if (reader.Name == "numFmts" && reader.NodeType == XmlNodeType.EndElement)
+                                else if (reader.IsEndElement("numFmts"))
                                     break;
                             }
                         }
-                        else if (reader.Name == "cellXfs" && reader.NodeType == XmlNodeType.Element)
+                        else if (reader.IsStartElement("cellXfs"))
                         {
                             while (reader.Read())
                             {
-                                if (reader.Name == "xf" && reader.NodeType == XmlNodeType.Element)
+                                if (reader.IsStartElement("xf"))
                                 {
                                     var numFmtId = reader.GetAttribute("numFmtId");
                                     var applyNumberFormat = reader.GetAttribute("applyNumberFormat");
                                     styleConfig.CellXfs.Add(new CellXfItem { ApplyNumFmtId = int.Parse(numFmtId), ApplyNumberFormat = applyNumberFormat == "1" });
                                 }
-                                else if (reader.Name == "cellXfs" && reader.NodeType == XmlNodeType.EndElement)
+                                else if (reader.IsEndElement("cellXfs"))
                                     break;
                             }
                         }
@@ -90,14 +94,14 @@ namespace FED.Excel.Core.Ext
                 {
                     while (!reader.EOF)
                     {
-                        if (reader.Name == "row" && reader.NodeType == XmlNodeType.Element)
+                        if (reader.IsStartElement("row"))
                         {
                             var rowNumber = reader.GetAttribute("r");
                             var row = new SheetRow { RowNumber = int.Parse(rowNumber) };
-                            var cell=new SheetRowCell();
+                            var cell = new SheetRowCell();
                             while (reader.Read())
                             {
-                                if (reader.Name == "c" && reader.NodeType == XmlNodeType.Element)
+                                if (reader.IsStartElement("c"))
                                 {
                                     var cellNumber = reader.GetAttribute("r");
                                     var styleIdStr = reader.GetAttribute("s");
@@ -114,21 +118,22 @@ namespace FED.Excel.Core.Ext
                                         CellType = cellType,
                                         StyleId = styleId
                                     };
+                                    row.Cells.Add(cell);
                                 }
-                                else if (reader.Name == "v" && reader.NodeType == XmlNodeType.Element)
+                                else if (reader.IsStartElement("v"))
                                 {
                                     reader.Read();
                                     var value = reader.Value;
                                     cell.Value = value;
                                 }
-                                else if (reader.Name == "row" && reader.NodeType == XmlNodeType.EndElement)
+                                else if (reader.IsEndElement("row"))
                                 {
                                     sheetData.Rows.Add(row);
                                     break;
                                 }
                             }
                         }
-                        else if (reader.Name == "sheetData" && reader.NodeType == XmlNodeType.EndElement)
+                        else if (reader.IsEndElement("sheetData"))
                             break;
                         reader.Read();
                     }
