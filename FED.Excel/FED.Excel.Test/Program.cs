@@ -13,8 +13,8 @@ var i = 0;
     var w = new Stopwatch();
     w.Start();
     i++;
-    var wb = new ExcelWorkbook("D:\\bigExcel.xlsx");
-    var sheet02 = wb.Sheets[0].ConvertTo<BigTest>();
+    var wb = new ExcelWorkbook<BigTest>("D:\\bigExcel.xlsx");
+   // var sheet02 = wb.Sheets[0].ConvertTo<BigTest>();
     w.Stop();
     Console.WriteLine(w.ElapsedMilliseconds);
 

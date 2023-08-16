@@ -9,9 +9,9 @@ using System.Xml.Linq;
 
 namespace FED.Excel.Core
 {
-    public class ExcelWorkbook : IDisposable
+    public class ExcelWorkbook<T> where T : class, new()
     {
-        public List<ExcelWorksheet> Sheets { get; set; } = new List<ExcelWorksheet>();
+        public List<T> Items { get; set; } = new List<T>();
 
         public ExcelWorkbook() { }
 
@@ -37,76 +37,61 @@ namespace FED.Excel.Core
         {
             using (var package = new ExcelPackage(stream))
             {
+                Items = package.GetSheetDatas<T>();
                 //转换对象
-                BuildWorkbook(package);
+                //BuildWorkbook(package);
             }
         }
 
-        private void BuildWorkbook(ExcelPackage package)
-        {
-            var pgUnNullSheets = package.Sheets.Where(x => x.Rows != null).ToList();
-            foreach (var pgSheet in pgUnNullSheets)
-            {
-                var sheet = AppendSheet(pgSheet.Name);
-                foreach (var pgRow in pgSheet.Rows)
-                {
-                    var row = sheet.AppendRow();
-                    foreach (var pgCell in pgRow.Cells)
-                    {
-                        var cell = row.CreateCell(pgCell.CellNumber.Replace(pgRow.RowNumber.ToString(), string.Empty));
-                        if (pgCell.Value == null)
-                            continue;
-                        if (pgCell.CellType == "s")//字符串
-                        {
-                            string value;
-                            try//先转换为索引查询公共字符串表
-                            {
-                                var index = Convert.ToInt32(pgCell.Value);
-                                value = package.SharedStrings[index];
-                            }
-                            catch//失败则为原始值
-                            {
-                                value = pgCell.Value;
-                            }
-                            cell.SetValue(value);
-                        }
-                        else
-                        {
-                            //判断是日期还是数字
-                            if (package.Style.IsDate(pgCell.StyleId))
-                            {
-                                var sourceValue = Convert.ToDouble(pgCell.Value);
-                                var value = DateTime.FromOADate(sourceValue);
-                                cell.SetValue(value);
-                            }
-                            else
-                            {
-                                cell.SetValue(pgCell.Value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //private void BuildWorkbook(ExcelPackage package)
+        //{
+        //    var pgUnNullSheets = package.Sheets.Where(x => x.Rows != null).ToList();
+        //    foreach (var pgSheet in pgUnNullSheets)
+        //    {
+        //        var sheet = AppendSheet(pgSheet.Name);
+        //        foreach (var pgRow in pgSheet.Rows)
+        //        {
+        //            var row = sheet.AppendRow();
+        //            foreach (var pgCell in pgRow.Cells)
+        //            {
+        //                var cell = row.CreateCell(pgCell.CellNumber.Replace(pgRow.RowNumber.ToString(), string.Empty));
+        //                if (pgCell.Value == null)
+        //                    continue;
+        //                if (pgCell.CellType == "s")//字符串
+        //                {
+        //                    string value;
+        //                    try//先转换为索引查询公共字符串表
+        //                    {
+        //                        var index = Convert.ToInt32(pgCell.Value);
+        //                        value = package.SharedStrings[index];
+        //                    }
+        //                    catch//失败则为原始值
+        //                    {
+        //                        value = pgCell.Value;
+        //                    }
+        //                    cell.SetValue(value);
+        //                }
+        //                else
+        //                {
+        //                    //判断是日期还是数字
+        //                    if (package.Style.IsDate(pgCell.StyleId))
+        //                    {
+        //                        var sourceValue = Convert.ToDouble(pgCell.Value);
+        //                        var value = DateTime.FromOADate(sourceValue);
+        //                        cell.SetValue(value);
+        //                    }
+        //                    else
+        //                    {
+        //                        cell.SetValue(pgCell.Value);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
 
-        public ExcelWorksheet AppendSheet(string name)
-        {
-            var sheet = new ExcelWorksheet(Sheets.Count, name);
-            Sheets.Add(sheet);
-            return sheet;
-        }
 
-        public ExcelWorksheet InsertSheet(int index, string name)
-        {
-            var maxIndex = Sheets.Count - 1;
-            if (index > maxIndex)
-                return AppendSheet(name);
-            var sheet = new ExcelWorksheet(index, name);
-            Sheets.Where(x => x.Index >= index).ToList().ForEach(x => x.Index += 1);
-            Sheets.Insert(index, sheet);
-            return sheet;
-        }
 
         /// <summary>
         /// 保存为文件
@@ -117,9 +102,5 @@ namespace FED.Excel.Core
             //转package再调用SaveAs()
         }
 
-        public void Dispose()
-        {
-            Sheets = null;
-        }
     }
 }

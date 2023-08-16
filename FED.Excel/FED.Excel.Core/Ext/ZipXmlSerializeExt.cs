@@ -17,7 +17,7 @@ namespace FED.Excel.Core.Ext
             return reader.Name == nodeName && reader.NodeType == XmlNodeType.EndElement;
         }
 
-        public static ShareStringsTable DeserializeShareStrings(this ZipArchiveEntry entry)
+        public static ShareStringsTable GetShareStrings(this ZipArchiveEntry entry)
         {
             using (var stream = entry.Open())
             {
@@ -40,7 +40,7 @@ namespace FED.Excel.Core.Ext
             }
         }
 
-        public static StyleConfig DeserializeStyleConfig(this ZipArchiveEntry entry)
+        public static StyleConfig GetStyleConfig(this ZipArchiveEntry entry)
         {
             using (var stream = entry.Open())
             {
@@ -85,19 +85,20 @@ namespace FED.Excel.Core.Ext
         }
 
 
-        public static SheetData DeserializeSheet(this ZipArchiveEntry entry)
+        public static IEnumerable<List<ExcelSheetCell>> GetSheetRows(this ZipArchiveEntry entry, ShareStringsTable sharedStrings, StyleConfig styleConfig)
         {
             using (var stream = entry.Open())
             {
-                var sheetData = new SheetData();
+                //var sheetData = new SheetData();
                 using (var reader = XmlReader.Create(stream, new XmlReaderSettings { IgnoreComments = true, IgnoreWhitespace = true, IgnoreProcessingInstructions = true, XmlResolver = null }))
                 {
                     while (!reader.EOF)
                     {
                         if (reader.IsStartElement("row"))
                         {
+                            var rowCells = new List<ExcelSheetCell>();
                             var rowNumber = reader.GetAttribute("r");
-                            var row = new SheetRow { RowNumber = int.Parse(rowNumber) };
+                            //var row = new SheetRow { RowNumber = int.Parse(rowNumber) };
                             var cell = new SheetRowCell();
                             while (reader.Read())
                             {
@@ -114,21 +115,22 @@ namespace FED.Excel.Core.Ext
                                     var cellType = reader.GetAttribute("t");
                                     cell = new SheetRowCell
                                     {
-                                        CellNumber = cellNumber,
+                                        CellNumber = cellNumber.Replace(rowNumber, ""),
                                         CellType = cellType,
                                         StyleId = styleId
                                     };
-                                    row.Cells.Add(cell);
                                 }
                                 else if (reader.IsStartElement("v"))
                                 {
                                     reader.Read();
-                                    var value = reader.Value;
-                                    cell.Value = value;
+                                    cell.Value = reader.Value;
+                                    var excelCell = cell.ConvertCell(sharedStrings, styleConfig);
+                                    rowCells.Add(excelCell);
                                 }
                                 else if (reader.IsEndElement("row"))
                                 {
-                                    sheetData.Rows.Add(row);
+                                    //sheetData.Rows.Add(row);
+                                    yield return rowCells;
                                     break;
                                 }
                             }
@@ -137,9 +139,44 @@ namespace FED.Excel.Core.Ext
                             break;
                         reader.Read();
                     }
-                    return sheetData;
+                    //return sheetData;
                 }
             }
+        }
+
+        public static ExcelSheetCell ConvertCell(this SheetRowCell pgCell, ShareStringsTable sharedStrings, StyleConfig styleConfig)
+        {
+            var cell = new ExcelSheetCell();
+            cell.Column = pgCell.CellNumber;
+            if (pgCell.CellType == "s")//字符串
+            {
+                string value;
+                try//先转换为索引查询公共字符串表
+                {
+                    var index = Convert.ToInt32(pgCell.Value);
+                    value = sharedStrings[index];
+                }
+                catch//失败则为原始值
+                {
+                    value = pgCell.Value;
+                }
+                cell.Value = value;
+            }
+            else
+            {
+                //判断是日期还是数字
+                if (styleConfig.IsDate(pgCell.StyleId))
+                {
+                    var sourceValue = Convert.ToDouble(pgCell.Value);
+                    var value = DateTime.FromOADate(sourceValue);
+                    cell.Value = value;
+                }
+                else
+                {
+                    cell.Value = pgCell.Value;
+                }
+            }
+            return cell;
         }
     }
 }

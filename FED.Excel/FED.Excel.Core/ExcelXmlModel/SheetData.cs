@@ -22,6 +22,10 @@ namespace FED.Excel.Core.ExcelXmlModel
     public class SheetRowCell
     {
         /// <summary>
+        /// 行索引
+        /// </summary>
+        public int RowNumber { get; set; }
+        /// <summary>
         /// 单元格标识
         /// </summary>
         public string CellNumber { get; set; }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace FED.Excel.Core
@@ -36,9 +37,8 @@ namespace FED.Excel.Core
 
         public void Build()
         {
-            SharedStrings = GetShareStrings(_zip);
-            Style = GetStyles(_zip);
-            Sheets = GetSheetDatas(_zip);
+            SharedStrings = GetShareStrings();
+            Style = GetStyles();
         }
 
         #region Excel文件解析
@@ -48,12 +48,12 @@ namespace FED.Excel.Core
         /// </summary>
         /// <param name="zip"></param>
         /// <returns></returns>
-        private ShareStringsTable GetShareStrings(ZipArchive zip)
+        private ShareStringsTable GetShareStrings()
         {
-            var sharedStringsEntry = zip.Entries.Where(x => x.FullName == "xl/sharedStrings.xml").FirstOrDefault();
+            var sharedStringsEntry = _zip.Entries.Where(x => x.FullName == "xl/sharedStrings.xml").FirstOrDefault();
             if (sharedStringsEntry == null)
                 return new ShareStringsTable();
-            var sharedStringsTable = sharedStringsEntry.DeserializeShareStrings();
+            var sharedStringsTable = sharedStringsEntry.GetShareStrings();
             return sharedStringsTable;
         }
 
@@ -62,12 +62,12 @@ namespace FED.Excel.Core
         /// </summary>
         /// <param name="zip"></param>
         /// <returns></returns>
-        private StyleConfig GetStyles(ZipArchive zip)
+        private StyleConfig GetStyles()
         {
-            var styleEntry = zip.Entries.Where(x => x.FullName == "xl/styles.xml").FirstOrDefault();
+            var styleEntry = _zip.Entries.Where(x => x.FullName == "xl/styles.xml").FirstOrDefault();
             if (styleEntry == null)
                 return new StyleConfig();
-            var style = styleEntry.DeserializeStyleConfig();
+            var style = styleEntry.GetStyleConfig();
             return style;
         }
 
@@ -76,17 +76,32 @@ namespace FED.Excel.Core
         /// </summary>
         /// <param name="zip"></param>
         /// <returns></returns>
-        private List<SheetData> GetSheetDatas(ZipArchive zip)
+        public List<T> GetSheetDatas<T>() where T : class, new()
         {
-            var sheetDataList = new List<SheetData>();
-            var sheetsEntry = zip.Entries.Where(x => x.FullName.StartsWith("xl/worksheets") && x.FullName.EndsWith(".xml") && !string.IsNullOrWhiteSpace(x.Name)).ToList();
+            var sheetDataList = new List<T>();
+            var sheetsEntry = _zip.Entries.Where(x => x.FullName.StartsWith("xl/worksheets") && x.FullName.EndsWith(".xml") && !string.IsNullOrWhiteSpace(x.Name)).ToList();
             if (sheetsEntry == null)
                 return sheetDataList;
             sheetsEntry.ForEach(sheetDataItem =>
             {
-                var item = sheetDataItem.DeserializeSheet();
-                item.Name = Path.GetFileNameWithoutExtension(sheetDataItem.Name);
-                sheetDataList.Add(item);
+                var readHeader = false;
+                List<(string Column, PropertyInfo Prop)> columnPropertyRelations = null;
+                foreach (var rowCells in sheetDataItem.GetSheetRows(SharedStrings, Style))
+                {
+                    if (!readHeader)
+                    {
+                        columnPropertyRelations = rowCells.GetColumnPropertyRelations<T>();
+                        readHeader = true;
+                    }
+                    else
+                    {
+                        var item = rowCells.ConvertTo<T>(columnPropertyRelations);
+                        sheetDataList.Add(item);
+                    }
+
+                }
+                //item.Name = Path.GetFileNameWithoutExtension(sheetDataItem.Name);
+                //sheetDataList.Add(item);
             });
             return sheetDataList;
         }
